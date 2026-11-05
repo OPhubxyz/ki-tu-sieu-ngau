@@ -66,6 +66,25 @@ function buildResults(){
  const text=document.getElementById("textInput").value;
  allResults=[];
  fontSets.forEach(s=>allResults.push({name:s.name,category:s.category,text:transformByChars(text,s.chars)}));
+ // Generate 300 additional variations: 13 Unicode families x 23 decorative treatments = 299,
+ // plus one extra Bold style.
+ const fontDecorations=[
+ ["",""],["✦ "," ✦"],["★ "," ★"],["☆ "," ☆"],["ღ "," ღ"],
+ ["彡","彡"],["乂","乂"],["メ","メ"],["〆","〆"],["亗 "," 亗"],
+ ["꧁","꧂"],["༺","༻"],["『","』"],["【","】"],["《","》"],
+ ["⟦","⟧"],["❮","❯"],["♡ "," ♡"],["♛ "," ♛"],["☬","☬"],
+ ["༒ "," ༒"],["⫷","⫸"],["୨","୧"]
+ ];
+ fontSets.forEach(family=>{
+   fontDecorations.forEach((dec,di)=>{
+     allResults.push({
+       name:"Font 300 · "+family.name+" · Style "+String(di+1).padStart(2,"0"),
+       category:"Font",
+       text:dec[0]+transformByChars(text,family.chars)+dec[1]
+     });
+   });
+ });
+ allResults.push({name:"Font 300 · Bold Extra",category:"Font",text:transformByChars(text,fontSets[0].chars)});
  extraStyles.forEach(s=>allResults.push({name:s.name,category:s.category,text:s.convert(text)}));
  wrappers.forEach((w,i)=>allResults.push({name:"Kí tự khung "+(i+1),category:"Trang trí",text:w[0]+text+w[1]}));
  wrappers.forEach((l,i)=>wrappers.forEach((r,j)=>{if(i!==j)allResults.push({name:"Kết hợp "+(i+1)+"-"+(j+1),category:"Ngoặc",text:l[0]+text+r[1]})}));
