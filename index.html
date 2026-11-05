@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101020">
+<title>Kí Tự Siêu Ngầu — Font & Kí Tự Đặc Biệt</title>
+<style>
+:root{--bg:#0c1020;--panel:#171d32;--panel2:#202943;--text:#f4f6ff;--muted:#aab4d0;--accent:#67e8f9;--pink:#f0abfc;--line:#303b59}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#20264b 0,#0c1020 55%);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{text-align:center;padding:35px 16px 24px}header h1{margin:0;font-size:clamp(28px,5vw,44px);letter-spacing:1px;background:linear-gradient(90deg,var(--accent),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}header p{color:var(--muted);margin:8px 0 0}
+main{max-width:1050px;margin:auto;padding:0 14px 40px}.panel{background:rgba(23,29,50,.94);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 35px #0003}
+label{display:block;font-weight:700;margin-bottom:8px}input{width:100%;border:1px solid #455174;border-radius:12px;background:#0d1427;color:white;padding:14px;font-size:18px;outline:none}input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #67e8f922}
+.controls{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:12px}.btn{border:0;border-radius:11px;padding:12px 16px;font-weight:750;cursor:pointer;background:var(--accent);color:#08121d}.btn.secondary{background:#303b59;color:white}.btn:hover{filter:brightness(1.08)}.search{margin:16px 0}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.tab{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 13px;border-radius:999px;cursor:pointer}.tab.active{background:var(--accent);color:#08121d;border-color:var(--accent);font-weight:800}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:20px 0 12px}.heading h2{font-size:20px;margin:0}.heading small{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px}.result{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px}.result .preview{min-width:0;overflow-wrap:anywhere;font-size:20px}.result .meta{font-size:11px;color:var(--muted);display:block;margin-bottom:3px}.result button{flex-shrink:0;border:0;border-radius:9px;background:#303b59;color:white;padding:9px 11px;cursor:pointer}.result button.done{background:#16a34a}.empty{color:var(--muted);padding:20px;text-align:center}.footer{text-align:center;color:var(--muted);padding:24px 12px;font-size:13px}
+@media(max-width:520px){.controls{grid-template-columns:1fr}.panel{padding:14px}.result .preview{font-size:18px}}
+</style>
+</head>
+<body>
+<header><h1>✦ KÍ TỰ SIÊU NGẦU ✦</h1><p>Chuyển chữ, tạo font Unicode và kí tự trang trí — copy nhanh</p></header>
+<main>
+<section class="panel">
+<label for="textInput">Nhập chữ, tên hoặc số</label>
+<input id="textInput" value="hello" placeholder="Ví dụ: hello, ABC, 123..." autocomplete="off">
+<div class="controls"><button class="btn" id="generateBtn">✨ Tạo kí tự</button><button class="btn secondary" id="copyAllBtn">📋 Sao chép tất cả</button></div>
+<input class="search" id="searchInput" placeholder="🔎 Tìm kiểu chữ hoặc mẫu kí tự...">
+<div class="tabs" id="tabs"></div>
+<div class="heading"><h2>Kết quả</h2><small id="count">0 mẫu</small></div>
+<div class="grid" id="results"></div>
+</section>
+<div class="footer">Lưu ý: font Unicode có thể hiển thị khác nhau tùy thiết bị và ứng dụng.</div>
+</main>
+<script>
+const alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const fontSets=[
+{name:"Bold",category:"Font",chars:"𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗"},
+{name:"Italic",category:"Font",chars:"𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔𝑕𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧"},
+{name:"Bold Italic",category:"Font",chars:"𝑨𝑩𝑪𝑫𝑬𝑭𝑮𝑯𝑰𝑱𝑲𝑳𝑴𝑵𝑶𝑷𝑸𝑹𝑺𝑻𝑼𝑽𝑾𝑿𝒀𝒁𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛"},
+{name:"Sans Bold",category:"Font",chars:"𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵"},
+{name:"Sans Italic",category:"Font",chars:"𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻"},
+{name:"Sans Bold Italic",category:"Font",chars:"𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯"},
+{name:"Monospace",category:"Font",chars:"𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿"},
+{name:"Double Struck",category:"Font",chars:"𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡"},
+{name:"Fraktur",category:"Font",chars:"𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷"},
+{name:"Bold Fraktur",category:"Font",chars:"𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟"},
+{name:"Script",category:"Font",chars:"𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝒶𝒷𝒸𝒹ℯ𝒻ℊ𝒽𝒾𝒿𝓀𝓁𝓂𝓃ℴ𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏"},
+{name:"Bold Script",category:"Font",chars:"𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃"},
+{name:"Fullwidth",category:"Font",chars:"ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９"}
+];
+const smallCaps={a:"ᴀ",b:"ʙ",c:"ᴄ",d:"ᴅ",e:"ᴇ",f:"ғ",g:"ɢ",h:"ʜ",i:"ɪ",j:"ᴊ",k:"ᴋ",l:"ʟ",m:"ᴍ",n:"ɴ",o:"ᴏ",p:"ᴘ",q:"ǫ",r:"ʀ",s:"s",t:"ᴛ",u:"ᴜ",v:"ᴠ",w:"ᴡ",x:"x",y:"ʏ",z:"ᴢ"};
+const wrappers=[
+["[","]"],["(",")"],["{","}"],["【","】"],["『","』"],["〖","〗"],["〚","〛"],["⟦","⟧"],["❨","❩"],["❪","❫"],["꒰","꒱"],["୨","୧"],["༼","༽"],["꧁","꧂"],["༺","༻"],["《","》"],["〈","〉"],["«","»"],["‹","›"],["⟪","⟫"],["⟨","⟩"],["❮","❯"],["❰","❱"],["⦃","⦄"],["⦅","⦆"],["⦗","⦘"],["⧼","⧽"],["﹝","﹞"],["﹙","﹚"],["⟬","⟭"],["★","★"],["☆","☆"],["✦","✦"],["✧","✧"],["❖","❖"],["♛","♛"],["ღ","ღ"],["♡","♡"],["♥","♥"],["☬","☬"],["彡","彡"],["乂","乂"],["メ","メ"],["〆","〆"],["亗","亗"],["ツ","ツ"],["☾","☽"],["✿","✿"],["❀","❀"],["∞","∞"],["۝","۝"],["۞","۞"],["⚝","⚝"],["☯","☯"],["♨","♨"],["⁂","⁂"],["⊹","⊹"],["⋆","⋆"],["⫷","⫸"],["≪","≫"],["༒","༒"],["ঔৣ","ঔৣ"]
+];
+const extraStyles=[
+{name:"Small Caps",category:"Font",convert:t=>[...t].map(c=>smallCaps[c.toLowerCase()]||c).join("")},
+{name:"Circled",category:"Font",convert:t=>[...t].map(c=>{let n=c.codePointAt(0);if(n>=65&&n<=90)return String.fromCodePoint(0x24B6+n-65);if(n>=97&&n<=122)return String.fromCodePoint(0x24D0+n-97);if(n>=48&&n<=57)return n===48?"⓪":String.fromCodePoint(0x2460+n-49);return c}).join("")},
+{name:"Superscript",category:"Font",convert:t=>[...t].map(c=>({"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","+":"⁺","-":"⁻","=":"⁼","(":"⁽",")":"⁾","n":"ⁿ","i":"ⁱ"}[c]||c)).join("")},
+{name:"Subscript",category:"Font",convert:t=>[...t].map(c=>({"0":"₀","1":"₁","2":"₂","3":"₃","4":"₄","5":"₅","6":"₆","7":"₇","8":"₈","9":"₉","+":"₊","-":"₋","=":"₌","(":"₍",")":"₎","a":"ₐ","e":"ₑ","h":"ₕ","i":"ᵢ","j":"ⱼ","k":"ₖ","l":"ₗ","m":"ₘ","n":"ₙ","o":"ₒ","p":"ₚ","r":"ᵣ","s":"ₛ","t":"ₜ","u":"ᵤ","v":"ᵥ","x":"ₓ"}[c]||c)).join("")}
+];
+let activeCategory="Tất cả",allResults=[];
+const categories=["Tất cả","Font","Ngoặc","Trang trí"];
+function transformByChars(text,chars){const arr=[...chars];const map=new Map([...alphabet].map((c,i)=>[c,arr[i]||c]));return [...text].map(c=>map.get(c)||c).join("")}
+function buildResults(){
+ const text=document.getElementById("textInput").value;
+ allResults=[];
+ fontSets.forEach(s=>allResults.push({name:s.name,category:s.category,text:transformByChars(text,s.chars)}));
+ extraStyles.forEach(s=>allResults.push({name:s.name,category:s.category,text:s.convert(text)}));
+ wrappers.forEach((w,i)=>allResults.push({name:"Kí tự khung "+(i+1),category:"Trang trí",text:w[0]+text+w[1]}));
+ wrappers.forEach((l,i)=>wrappers.forEach((r,j)=>{if(i!==j)allResults.push({name:"Kết hợp "+(i+1)+"-"+(j+1),category:"Ngoặc",text:l[0]+text+r[1]})}));
+ allResults=[...new Map(allResults.map(x=>[x.text,x])).values()];
+ render();
+}
+function renderTabs(){const tabs=document.getElementById("tabs");tabs.innerHTML="";categories.forEach(c=>{const b=document.createElement("button");b.className="tab"+(activeCategory===c?" active":"");b.textContent=c;b.onclick=()=>{activeCategory=c;renderTabs();render()};tabs.appendChild(b)})}
+function render(){const q=document.getElementById("searchInput").value.toLowerCase();const filtered=allResults.filter(x=>(activeCategory==="Tất cả"||x.category===activeCategory)&&(x.name.toLowerCase().includes(q)||x.text.toLowerCase().includes(q)));const root=document.getElementById("results");root.innerHTML="";document.getElementById("count").textContent=filtered.length+" mẫu";if(!filtered.length){root.innerHTML='<div class="empty">Không tìm thấy mẫu phù hợp.</div>';return}filtered.forEach(x=>{const card=document.createElement("div");card.className="result";const left=document.createElement("div");left.className="preview";const meta=document.createElement("span");meta.className="meta";meta.textContent=x.name;const value=document.createElement("div");value.textContent=x.text;left.append(meta,value);const btn=document.createElement("button");btn.textContent="Copy";btn.onclick=async()=>{await copyText(x.text);btn.textContent="Đã copy ✓";btn.classList.add("done");setTimeout(()=>{btn.textContent="Copy";btn.classList.remove("done")},1100)};card.append(left,btn);root.appendChild(card)})}
+async function copyText(text){try{await navigator.clipboard.writeText(text)}catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove()}}
+document.getElementById("generateBtn").onclick=buildResults;
+document.getElementById("textInput").addEventListener("keydown",e=>{if(e.key==="Enter")buildResults()});
+document.getElementById("searchInput").addEventListener("input",render);
+document.getElementById("copyAllBtn").onclick=async()=>{const q=document.getElementById("searchInput").value.toLowerCase();const shown=allResults.filter(x=>(activeCategory==="Tất cả"||x.category===activeCategory)&&(x.name.toLowerCase().includes(q)||x.text.toLowerCase().includes(q)));await copyText(shown.map(x=>x.text).join("\n"));alert("Đã sao chép "+shown.length+" mẫu!")};
+renderTabs();buildResults();
+</script>
+</body>
+</html>
